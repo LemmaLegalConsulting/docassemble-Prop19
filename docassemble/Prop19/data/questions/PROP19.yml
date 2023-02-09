@@ -1,0 +1,395 @@
+---
+include:
+  - docassemble.AssemblyLine:assembly_line.yml
+---
+metadata:
+  title: |
+    PROP 19
+  short title: |
+    PROP 19
+  authors:
+    - Ian Eisaman
+---
+mandatory: True
+comment: |
+  Global interview metadata
+variable name: interview_metadata["PROP19"]
+data:
+  al_weaver_version: "1.8.0"
+  generated on: "2023-01-16"
+  title: >-
+    PROP 19
+  short title: >-
+    PROP 19
+  description: |-
+    PROP 19
+  allowed courts: []
+  categories: []
+  typical role: "na"
+  generate download screen: True
+---
+code: |
+  interview_metadata['main_interview_key'] =  'PROP19'
+---
+code: |
+  # This controls the default country and list of states in address field questions
+  AL_DEFAULT_COUNTRY = "US"
+---
+code: |
+  # This controls the default state in address field questions
+  AL_DEFAULT_STATE = "CA"
+---
+code: |
+  github_repo_name =  'docassemble-Prop19'
+---
+code: |
+  interview_short_title = "Get a PROP 19"
+---
+code: |
+  al_form_type = "other_form" 
+---
+objects:
+  - users: ALPeopleList.using(ask_number=True,target_number=1)
+  - first_beneficiary: ALIndividual
+  - second_beneficiary: ALIndividual
+  - third_beneficiary: ALIndividual
+  - fourth_beneficiary: ALIndividual
+  - fifth_beneficiary: ALIndividual
+  - decedent: ALIndividual
+  - transferor: ALPeopleList.using(there_are_any=True)
+  - transferee: ALPeopleList.using(there_are_any=True)
+  - parcel: ALAddress
+  - client_address: ALAddress
+---
+sections:
+  - review_PROP19: Review your answers
+---
+#################### Interview order #####################
+comment: |
+  Controls order and branching logic for questions specific to this form
+id: interview_order_PROP19
+code: |
+  # Set the allowed courts for this interview
+  allowed_courts = interview_metadata["PROP19"]["allowed courts"]
+  nav.set_section("review_PROP19")
+  user_role = "na"
+  user_ask_role = "na"
+  decedent.name.first
+  first_beneficiary.name.first
+  if does_bene2_exist:
+    second_beneficiary.name.first
+    bene2_status = "Child"
+    if db3:
+      third_beneficiary.name.first
+      db3s = "Child"
+      if db4:
+        fourth_beneficiary.name.first
+        db4s = "Child"
+        if db5:
+          fifth_beneficiary.name.first
+          db5s = "Child"
+  else: 
+    bene2_status = ""
+  client_address.address
+  parcel.address
+  parcel.apn
+  was_transferee_residence
+  # name_and_address
+  # multi_unit_explanation
+  # was_inlaw_cause_divorce
+  # set_progress(20)
+  # transferee1_sign_name
+  # transferor.gather()
+  # set_progress(40)
+  # transferee.gather()
+  interview_order_PROP19 = True
+---
+###################### Main order ######################
+comment: |
+  This block includes the logic for standalone interviews.
+  Delete mandatory: True to include in another interview
+mandatory: True
+code: |
+  # al_intro_screen
+  PROP19_intro
+  interview_order_PROP19
+  signature_date
+  # Store anonymous data for analytics / statistics
+  store_variables_snapshot(
+      persistent=True,
+      data={
+          "zip": showifdef("users[0].address.zip"),
+          "reached_interview_end": True,
+      },
+  )
+  PROP19_download
+---
+comment: |
+  This question is used to introduce your interview. Please customize
+id: PROP_19
+continue button field: PROP19_intro
+question: |
+  Fill a PROP 19 Form
+---
+question: |
+  Is there a second beneficiary?
+yesno: does_bene2_exist
+---
+question: |
+  Is there a third beneficiary?
+yesno: db3
+---
+question: |
+  Is there a fourth beneficiary?
+yesno: db4
+---
+question: |
+  Is there a fifth beneficiary?
+yesno: db5
+---
+id: page 1
+question: |
+  Page 1
+fields: 
+  - Parcel APN: parcel.apn
+    datatype: text
+    required: False
+  - Decedent Death Date: decedent.death_date
+    datatype: date
+    required: False
+  - Was this the decedent's principal residence?: was_transferor_residence
+    datatype: yesno
+  - Was Decedent a disabled veteran?: was_transferor_veteran
+    datatype: yesno
+    show if: was_transferor_residence
+  - Was this a joint tenancy?: was_property_joint
+    datatype: yesno
+---
+id: page 2
+question: |
+  Page 2
+fields:
+  - Is this currently the transferee's principal residence?: was_transferee_residence
+    datatype: yesno
+  - Name of transferee who filed exemption claim: exemption_filer
+    show if: was_transferee_residence
+  - What is the date occupancy started?: existing_occupancy_date
+    datatype: date
+    show if: was_transferee_residence
+    required: False
+  - Does the Child own other real estate in California?: owns_prior_property
+    datatype: yesno
+  - Move out date: prior_property_move_date
+    datatype: date
+    required: False
+    show if:
+      variable: owns_prior_property
+      is: False
+  - Date of intended occupancy: future_occupancy_date
+    datatype: date
+    required: False
+    show if:
+      variable: was_transferee_residence
+      is: False
+---
+id: preview PROP19
+question: |
+  Preview your form before you sign it
+subquestion: |
+  Here is a preview of the form you will sign on the next page.   
+  
+  ${ al_recipient_bundle.as_pdf(key='preview') }
+
+  Click the image to open it in a new tab. Click the "Edit answers" button
+  to edit your answers.
+
+  ${ action_button_html(url_action('review_PROP19'), label='Edit answers', color='info') }
+  
+  Remember to come back to this window to continue and sign your form.
+continue button field: PROP19_preview_question    
+---
+code: |
+  signature_fields = []
+---
+continue button field: transferor.revisit
+question: |
+  Edit transferor
+subquestion: |
+  ${ transferor.table }
+
+  ${ transferor.add_action() }
+---
+table: transferor.table
+rows: transferor
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+edit:
+  - name.first
+confirm: True
+
+---
+continue button field: transferee.revisit
+question: |
+  Edit transferee
+subquestion: |
+  ${ transferee.table }
+
+  ${ transferee.add_action() }
+---
+table: transferee.table
+rows: transferee
+columns:
+  - Name: |
+      row_item.name.full() if defined("row_item.name.first") else ""
+edit:
+  - name.first
+confirm: True
+
+---
+id: download PROP19
+event: PROP19_download
+question: |
+  All done
+subquestion: |
+  Thank you. Your form is ready to download and deliver.
+  
+  View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
+
+  ${ action_button_html(url_action('review_PROP19'), label='Edit answers', color='info') }
+  
+  
+  ${ al_user_bundle.download_list_html() }
+  
+
+  ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
+
+progress: 100
+---
+# ALDocument objects specify the metadata for each template
+objects:
+  - PROP19_Post_interview_instructions: ALDocument.using(title="Instructions", filename="PROP19_next_steps.docx", enabled=True, has_addendum=False)
+  - PROP19_attachment: ALDocument.using(title="PROP 19", filename="PROP19", enabled=True, has_addendum=False, )
+---
+# Bundles group the ALDocuments into separate downloads, such as for court and for the user
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[PROP19_Post_interview_instructions, PROP19_attachment], filename="PROP19", title="All forms to download for your records", enabled=True)
+  - al_recipient_bundle: ALDocumentBundle.using(elements=[PROP19_attachment],  filename="PROP19", title="All forms to file", enabled=True)
+---
+# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
+# used for "preview" and "final" keys, and logic in the template checks the value of 
+# `i` to show or hide the user's signature
+attachment:
+  name: Post-interview-Instructions
+  filename: PROP19_next_steps
+  docx template file: PROP19_next_steps.docx
+  variable name: PROP19_Post_interview_instructions[i]
+  skip undefined: True
+---
+attachment:
+  name: PROP19
+  filename: PROP19
+  variable name: PROP19_attachment[i]
+  skip undefined: True
+  pdf template file: PROP19.pdf
+  fields:
+      - "name_and_address": ""
+      - "parcel_apn": ${ parcel.apn }
+      - "parcel_address": ${ parcel.address }
+      - "parcel_city": ${ parcel.city }
+      - "recorder_document_number": ""
+      - "transfer_date": ${ decedent.death_date.format_date() }
+      - "probate_number": ""
+      - "death_date": ${ decedent.death_date.format_date() }
+      - "decree_date": ""
+      - "transferor1_name": ${ decedent }
+      - "transferor2_name": ""
+      - "transferor1_relationship": "Parent"
+      - "transferor2_relationship": ""
+      - "was_transferor_farm_yes": ""
+      - "was_transferor_farm_no": No
+      - "was_transferor_farm_pasture": ""
+      - "transferor_cultivation_explanation": ""
+      - "was_transferor_farm_commodity": ""
+      - "was_transferor_farm_cultivation": ""
+      - "was_transferor_residence_yes": ${ was_transferor_residence }
+      - "was_transferor_residence_no": ${ was_transferor_residence }
+      - "was_transferor_exemption_veteran": ${ was_transferor_veteran }
+      - "was_transferor_exemption_homeowners": ${ was_transferor_residence }
+      - "is_multi_unit_yes": ${ not(was_transferor_residence) }
+      - "is_multi_unit_no": ${ not(was_transferor_residence) }
+      - "multi_unit_explanation": ""
+      - "was_partial_transfer_yes": ""
+      - "was_partial_transfer_no": No
+      - "percentage_transferred": ""
+      - "was_joint_tenancy_yes": ${ was_property_joint }
+      - "was_joint_tenancy_no": ${ was_property_joint }
+      - "transferor1_sign_date": ""
+      - "transferor1_sign_name": ${ first_beneficiary }
+      - "transferor2_sign_date": ""
+      - "transferor2_sign_name": ""
+      - "transferor_sign_area_code": ""
+      - "transferor_sign_line1": ${ client_address.address }
+      - "transferor_sign_phone": ""
+      - "transferor_sign_email": ""
+      - "transferor_sign_line2": ${ client_address.city }, ${ client_address.state }, ${ client_address.zip }
+      - "adoption_age": ""
+      - "was_step_married_yes": ""
+      - "was_step_married_no": Yes
+      - "was_step_cause_death": ""
+      - "was_step_cause_divorce": ""
+      - "did_step_remarry_yes": ""
+      - "did_step_remarry_no": Yes
+      - "was_inlaw_married_yes": ""
+      - "was_inlaw_married_no": Yes
+      - "was_inlaw_cause_death": ""
+      - "was_inlaw_cause_divorce": ""
+      - "did_inlaw_remarry_yes": ""
+      - "did_inlaw_remarry_no": Yes
+      - "transferee1_name": ${ first_beneficiary }
+      - "transferee2_name": ${ second_beneficiary }
+      - "transferee2_relationship": ${ bene2_status }
+      - "transferee1_relationship": "Child"
+      - "is_transferee_farm_yes": ""
+      - "is_transferee_farm_no": No
+      - "is_transferee_residence_yes": ${ was_transferee_residence }
+      - "is_transferee_residence_no": ${ was_transferee_residence }
+      - "transferee_occupancy_date": ${ prior_property_move_date.format_date() }
+      - "is_multiunit_yes": ""
+      - "is_multiunit_no": ${ not(was_transferee_residence) }
+      - "transferee_residence_unit": ""
+      - "is_transferee_exempt_yes": ""
+      - "is_transferee_exempt_no": ${ not(was_transferee_residence) }
+      - "exemption_filing_transferee": ${ exemption_filer }
+      - "was_transferee_exemption_veteran": ""
+      - "was_transferee_exemption_homeowners": ${ was_transferee_residence }
+      - "transferee_exemptee_residence_date": ${ existing_occupancy_date.format_date() }
+      - "does_transferee_prior_residence_yes": ${ owns_prior_property }
+      - "does_transferee_prior_residence_no": ${ owns_prior_property }
+      - "transferee_prior_county": ""
+      - "transferee_prior_address": ""
+      - "transferee_prior_apn": ""
+      - "transferee_move_out_date": ${ future_occupancy_date.format_date() }
+      - "transferee_prior_line2": ""
+      - "transferee1_sign_name": ${ first_beneficiary }
+      - "transferee1_sign_date": ""
+      - "transferee2_sign_name": ""
+      - "transferee2_sign_date": ""
+      - "transferee_sign_area_code": ""
+      - "transferee_sign_phone": ""
+      - "transferee_sign_line1": ${ client_address.address }
+      - "transferee_sign_line2": ${ client_address.city }, ${ client_address.state }, ${ client_address.zip }
+      - "transferee_sign_email": ""
+      - "additional_transferor1_relationship": ""
+      - "additional_transferor1_name": ""
+      - "additional_transferor2_relationship": ""
+      - "additional_transferor2_name": ""
+      - "additional_transferor3_relationship": ""
+      - "additional_transferor3_name": ""
+      - "additional_transferee1_name": ${ third_beneficiary }
+      - "additional_transferee1_relationship": ${ db3s }
+      - "additional_transferee2_relationship": ${ db4s }
+      - "additional_transferee2_name": ${ fourth_beneficiary }
+      - "additional_transferee3_name": ${ fifth_beneficiary }
+      - "additional_transferee3_relationship": ${ db5s }
+

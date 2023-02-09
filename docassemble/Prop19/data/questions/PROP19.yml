@@ -50,6 +50,7 @@ code: |
 ---
 objects:
   - users: ALPeopleList.using(ask_number=True,target_number=1)
+  - client: ALIndividual
   - first_beneficiary: ALIndividual
   - second_beneficiary: ALIndividual
   - third_beneficiary: ALIndividual
@@ -75,6 +76,7 @@ code: |
   user_role = "na"
   user_ask_role = "na"
   decedent.name.first
+  client.name.first
   first_beneficiary.name.first
   if does_bene2_exist:
     second_beneficiary.name.first
@@ -129,7 +131,9 @@ comment: |
 id: PROP_19
 continue button field: PROP19_intro
 question: |
-  Fill a PROP 19 Form
+  Prop. 19
+subquestion: |
+  Complete Prop. 19 form
 ---
 question: |
   Is there a second beneficiary?
@@ -173,18 +177,13 @@ fields:
     datatype: yesno
   - Name of transferee who filed exemption claim: exemption_filer
     show if: was_transferee_residence
+    required: False
   - What is the date occupancy started?: existing_occupancy_date
     datatype: date
     show if: was_transferee_residence
     required: False
   - Does the Child own other real estate in California?: owns_prior_property
     datatype: yesno
-  - Move out date: prior_property_move_date
-    datatype: date
-    required: False
-    show if:
-      variable: owns_prior_property
-      is: False
   - Date of intended occupancy: future_occupancy_date
     datatype: date
     required: False
@@ -325,7 +324,7 @@ attachment:
       - "was_joint_tenancy_yes": ${ was_property_joint }
       - "was_joint_tenancy_no": ${ was_property_joint }
       - "transferor1_sign_date": ""
-      - "transferor1_sign_name": ${ first_beneficiary }
+      - "transferor1_sign_name": ${ client }
       - "transferor2_sign_date": ""
       - "transferor2_sign_name": ""
       - "transferor_sign_area_code": ""
@@ -354,7 +353,7 @@ attachment:
       - "is_transferee_farm_no": No
       - "is_transferee_residence_yes": ${ was_transferee_residence }
       - "is_transferee_residence_no": ${ was_transferee_residence }
-      - "transferee_occupancy_date": ${ prior_property_move_date.format_date() }
+      - "transferee_occupancy_date": ${ future_occupancy_date.format_date() }
       - "is_multiunit_yes": ""
       - "is_multiunit_no": ${ not(was_transferee_residence) }
       - "transferee_residence_unit": ""
@@ -369,7 +368,7 @@ attachment:
       - "transferee_prior_county": ""
       - "transferee_prior_address": ""
       - "transferee_prior_apn": ""
-      - "transferee_move_out_date": ${ future_occupancy_date.format_date() }
+      - "transferee_move_out_date": ""
       - "transferee_prior_line2": ""
       - "transferee1_sign_name": ${ first_beneficiary }
       - "transferee1_sign_date": ""

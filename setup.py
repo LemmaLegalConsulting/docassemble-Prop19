@@ -54,7 +54,7 @@ setup(name='docassemble.Prop19',
       url='https://courtformsonline.org',
       packages=find_packages(),
       namespace_packages=['docassemble'],
-      install_requires=['docassemble.AssemblyLine>=2.20.1'],
+      install_requires=['docassemble.AssemblyLine>=2.21.0'],
       zip_safe=False,
       package_data=find_package_data(where='docassemble/Prop19/', package='docassemble.Prop19'),
      )

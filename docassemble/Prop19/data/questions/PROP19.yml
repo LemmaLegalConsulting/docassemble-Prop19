@@ -131,9 +131,9 @@ comment: |
 id: PROP_19
 continue button field: PROP19_intro
 question: |
-  Prop. 19
+  Prop 19
 subquestion: |
-  Complete Prop. 19 form
+  Begin new Prop 19 form.
 ---
 question: |
   Is there a second beneficiary?
@@ -251,39 +251,29 @@ event: PROP19_download
 question: |
   All done
 subquestion: |
-  Thank you. Your form is ready to download and deliver.
+  Your Prop 19 form for ${first_beneficiary} is ready to download and deliver.
   
   View, download and send your form below. Click the "Edit answers" button to fix any mistakes.
 
-  ${ action_button_html(url_action('review_PROP19'), label='Edit answers', color='info') }
-  
-  
   ${ al_user_bundle.download_list_html() }
   
 
   ${ al_user_bundle.send_button_html(show_editable_checkbox=False) }
 
 progress: 100
+buttons:
+  - Start again: new_session
 ---
-# ALDocument objects specify the metadata for each template
 objects:
-  - PROP19_Post_interview_instructions: ALDocument.using(title="Instructions", filename="PROP19_next_steps.docx", enabled=True, has_addendum=False)
-  - PROP19_attachment: ALDocument.using(title="PROP 19", filename="PROP19", enabled=True, has_addendum=False, )
+  - PROP19_attachment: ALDocument.using(title="PROP19 Form", filename="PROP19.pdf", enabled=True, has_addendum=False, default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
+  - PROP19_attachment_flattened: ALDocument.using(title="PROP19 Form (flattened)", filename="PROP19.pdf", enabled=True, has_addendum=False, default_overflow_message=AL_DEFAULT_OVERFLOW_MESSAGE)
 ---
-# Bundles group the ALDocuments into separate downloads, such as for court and for the user
 objects:
-  - al_user_bundle: ALDocumentBundle.using(elements=[PROP19_Post_interview_instructions, PROP19_attachment], filename="PROP19", title="All forms to download for your records", enabled=True)
-  - al_recipient_bundle: ALDocumentBundle.using(elements=[PROP19_attachment],  filename="PROP19", title="All forms to file", enabled=True)
+  - al_user_bundle: ALDocumentBundle.using(elements=[PROP19_attachment, PROP19_attachment_flattened], filename="PROP19.pdf_package.pdf", title="All forms to download for your records", enabled=True)
+  - al_recipient_bundle: ALDocumentBundle.using(elements=[PROP19_attachment, PROP19_attachment_flattened], filename="PROP19.pdf_package.pdf", title="All forms to download for your records", enabled=True)
 ---
-# Each attachment defines a key in an ALDocument. We use `i` as the placeholder here so the same template is 
-# used for "preview" and "final" keys, and logic in the template checks the value of 
-# `i` to show or hide the user's signature
-attachment:
-  name: Post-interview-Instructions
-  filename: PROP19_next_steps
-  docx template file: PROP19_next_steps.docx
-  variable name: PROP19_Post_interview_instructions[i]
-  skip undefined: True
+code: |
+  PROP19_attachment_flattened[i] = PROP19_attachment["flattened"]
 ---
 attachment:
   name: PROP19
@@ -291,6 +281,7 @@ attachment:
   variable name: PROP19_attachment[i]
   skip undefined: True
   pdf template file: PROP19.pdf
+  editable: i != "flattened"
   fields:
       - "name_and_address": ""
       - "parcel_apn": ${ parcel.apn }

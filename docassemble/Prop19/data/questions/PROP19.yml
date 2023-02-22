@@ -1,6 +1,14 @@
 ---
 include:
   - docassemble.AssemblyLine:assembly_line.yml
+  - docassemble.AssemblyLine:al_package.yml
+  - docassemble.PYLSupport:theme.yml
+---
+features:
+  bootstrap theme: docassemble.PYLSupport:pyl-bootstrap.min.css
+---
+modules:
+  - .box
 ---
 metadata:
   title: |
@@ -124,6 +132,7 @@ code: |
           "reached_interview_end": True,
       },
   )
+  al_recipient_bundle_published
   PROP19_download
 ---
 comment: |

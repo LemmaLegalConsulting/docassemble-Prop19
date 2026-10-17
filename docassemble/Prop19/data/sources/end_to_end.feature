@@ -13,14 +13,14 @@ Feature: Single beneficiary Prop 19
       | first_beneficiary.name.last | Smith |
       | client.name.first | Jane |
       | client.name.last | Smith |
-      | client_address.address | 123 Main Street |
-      | client_address.city | Boston |
-      | client_address.state | MA |
-      | client_address.zip | 02108 |
-      | parcel.address | 123 Main Street |
-      | parcel.city | Boston |
-      | parcel.state | MA |
-      | parcel.zip | 02108 |
+      | client_address.address | 123 Shattuck Avenue |
+      | client_address.city | Berkeley |
+      | client_address.state | CA |
+      | client_address.zip | 94704 |
+      | parcel.address | 123 Shattuck Avenue |
+      | parcel.city | Berkeley |
+      | parcel.state | CA |
+      | parcel.zip | 94704 |
       | does_bene2_exist | False |
       | users[0].name.first | Jane |
       | users[0].name.last | Smith |

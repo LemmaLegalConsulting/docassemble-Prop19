@@ -37,11 +37,6 @@ Feature: Single beneficiary Prop 19
       | does_bene2_exist | False |
       | parcel.apn | 1234-567-890 |
       | decedent.death_date | 01/02/2025 |
-      | was_transferor_residence | False |
-      | was_transferor_veteran | False |
-      | was_property_joint | False |
       | were_others_excludable | False |
-      | was_transferee_residence | False |
-      | owns_prior_property | False |
       | future_occupancy_date | 01/02/2026 |
     Then I should see the phrase "ready to download and deliver."

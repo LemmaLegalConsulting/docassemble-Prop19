@@ -21,6 +21,7 @@ jobs:
     steps:
       - name: Make room for docassemble
         run: sudo rm -rf /usr/local/lib/android /opt/ghc /usr/share/dotnet /opt/hostedtoolcache/CodeQL
+      # Private PYLSupport installation needs container-side read access; see ALKILN_TESTING.md.
       - name: Start an isolated temporary docassemble server
         id: server
         uses: SuffolkLITLab/ALKiln/action_for_github_server@7b399f7138a06cb411cb93bda4d2015cea9216c5 # v5
